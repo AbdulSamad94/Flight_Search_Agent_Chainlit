@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+.venv/
+*.env
+*.sqlite3
+*.db
+
+# VS Code
+.vscode/
+
+# Chainlit
+.chainlit/
+chainlit.db
+chatlogs/
+
+# Logs and Cache
+*.log
+*.cache
+*.tmp
+*.bak
+
+# macOS / Linux / Windows system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Test artifacts
+coverage/
+htmlcov/
+*.cover
+*.py,cover
+.hypothesis/
+
+# Others
+*.swp
+*.swo
