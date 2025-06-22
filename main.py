@@ -8,12 +8,10 @@ from agents import (
     RunConfig,
 )
 
-# Import our modules
 from config import GEMINI_API_KEY
 from tools import get_flights, get_city_airport_code
 from agent_config import AGENT_INSTRUCTIONS
 
-# Disable tracing for cleaner output
 set_tracing_disabled(disabled=True)
 
 
@@ -33,7 +31,6 @@ async def start():
         model=model, model_provider=external_client, tracing_disabled=True
     )
 
-    # Initialize session variables
     cl.user_session.set("chat_history", [])
     cl.user_session.set("config", config)
 
@@ -46,16 +43,15 @@ async def start():
     )
     cl.user_session.set("agent", agent)
 
-    # Send welcome message
     await cl.Message(
-        content="Welcome to the AI Flight Assistant!\n\nI can help you find flights for today. Just tell me where you want to fly from and to - you can use city names (like 'Karachi to Dubai') or airport codes. How can I help you today?"
+        content="Welcome to the AI Flight Assistant!\n\nI can help you find flights for today. Just tell me where you want to fly from and to, you can use city names or airport codes. How can I help you today?"
     ).send()
 
 
 @cl.on_message
 async def main(message: cl.Message):
     """Handle incoming messages and process flight requests"""
-    # Show thinking indicator
+
     msg = cl.Message(content="")
     await msg.send()
 
