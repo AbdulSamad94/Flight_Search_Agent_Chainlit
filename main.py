@@ -55,7 +55,6 @@ async def main(message: cl.Message):
     msg = cl.Message(content="")
     await msg.send()
 
-    # Update to show thinking status
     msg.content = "Thinking..."
     await msg.update()
 
@@ -66,20 +65,14 @@ async def main(message: cl.Message):
     history.append({"role": "user", "content": message.content})
 
     try:
-        # Process the request through the agent
-        result = Runner.run_streamed(agent, history, run_config=config)
+        result = Runner.run_sync(agent, history, run_config=config)
 
         # Clear the thinking message and prepare for streaming
         msg.content = ""
         await msg.update()
 
         # Stream the response
-        full_response = ""
-        async for event in result.stream_events():
-            if event.type == "raw_response_event" and hasattr(event.data, "delta"):
-                token = event.data.delta
-                full_response += token
-                await msg.stream_token(token)
+        full_response = "Thinking"
 
         # Get the final response
         response_content = result.final_output
