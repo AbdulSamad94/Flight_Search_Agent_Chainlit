@@ -96,7 +96,7 @@ async def main(message: cl.Message):
         history.append({"role": "assistant", "content": msg.content})
         cl.user_session.set("chat_history", history)
 
-        # Debug logging
+        # for tha Debug logging
         print(f"User: {message.content}")
         print(f"Assistant: {msg.content}")
 
