@@ -183,13 +183,13 @@ def format_upcoming_flights_info(
                 )
 
                 result += f"""
-**{i}. Flight {flight_number}** - {airline}
-- **Departure:** {dep_time} (Terminal {dep_terminal})
-- **Arrival:** {arr_time} (Terminal {arr_terminal})
-- **Status:** {status_indicator} {status}
-- **Booking:** 
-{booking_button}
-"""
+                **{i}. Flight {flight_number}** - {airline}
+                - **Departure:** {dep_time} (Terminal {dep_terminal})
+                - **Arrival:** {arr_time} (Terminal {arr_terminal})
+                - **Status:** {status_indicator} {status}
+                - **Booking:** 
+                {booking_button}
+                """
 
                 # Add codeshare info if available
                 if flight["flight"].get("codeshared"):

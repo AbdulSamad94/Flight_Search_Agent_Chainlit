@@ -85,6 +85,6 @@ MULTIPLE_AIRPORTS = {
     ],
 }
 
-# API Configuration
+
 API_TIMEOUT = 15
 MAX_FLIGHT_RESULTS = 10
