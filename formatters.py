@@ -211,23 +211,23 @@ def format_no_flights_message(dep_code: str, arr_code: str) -> str:
     today_formatted = format_date(date.today())
 
     return f"""
-# FLIGHT SEARCH RESULTS
+    # FLIGHT SEARCH RESULTS
 
-## NO FLIGHTS FOUND
-### {dep_code} to {arr_code}
+    ## NO FLIGHTS FOUND
+    ### {dep_code} to {arr_code}
 
-**Search Period:** {today_formatted} - Next 7 days
+    **Search Period:** {today_formatted} - Next 7 days
 
----
+    ---
 
-### What you can try:
+    ### What you can try:
 
-1. **Double-check airport codes** - Make sure the airports are correct
-2. **Try different dates** - This route might not operate daily
-3. **Check nearby airports** - Some cities have multiple airports
-4. **Contact airline directly** - For the most up-to-date schedules
+    1. **Double-check airport codes** - Make sure the airports are correct
+    2. **Try different dates** - This route might not operate daily
+    3. **Check nearby airports** - Some cities have multiple airports
+    4. **Contact airline directly** - For the most up-to-date schedules
 
----
+    ---
 
-**Need help?** Just ask me to search for flights from different cities or airports!
-"""
+    **Need help?** Just ask me to search for flights from different cities or airports!
+    """
