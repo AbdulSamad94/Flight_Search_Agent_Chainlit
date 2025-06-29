@@ -3,7 +3,6 @@ from agents import (
     Agent,
     OpenAIChatCompletionsModel,
     Runner,
-    set_tracing_disabled,
     AsyncOpenAI,
     RunConfig,
 )
@@ -11,8 +10,6 @@ from agents import (
 from config import GEMINI_API_KEY
 from tools import get_flights, get_city_airport_code
 from agent_config import AGENT_INSTRUCTIONS
-
-set_tracing_disabled(disabled=True)
 
 
 @cl.on_chat_start
@@ -44,7 +41,7 @@ async def start():
     cl.user_session.set("agent", agent)
 
     await cl.Message(
-        content="Welcome to the AI Flight Assistant!\n\nI can help you find flights for today. Just tell me where you want to fly from and to, you can use city names or airport codes. How can I help you today?"
+        content="Welcome to the AI Flight Assistant!\n\nI can help you find flights for today. Just tell me where you want to fly from & to, you can use city names or airport codes. How can I help you today?"
     ).send()
 
 
