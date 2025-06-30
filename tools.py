@@ -43,80 +43,85 @@ def get_city_airport_code(params: GetCityAirportParams) -> str:
         return f"The airport code for {params.city_name.title()} is {CITY_TO_AIRPORT[city]}"
 
     # City not found
-    return f"I couldn't find an airport code for '{params.city_name}'. Please provide the 3-letter airport code directly, or try a different city name."
+    return f"Sorry, I couldn't find an airport code for '{params.city_name.title()}'. You can try checking the spelling, using a different major city, or providing the 3-letter IATA airport code directly."
 
 
 @function_tool
 def get_flights(params: GetFlightsParams) -> str:
     """
-    Searches for flights based on the provided departure and arrival airports.
-    First searches for today's flights, if none found, searches for upcoming flights.
+    Searches for flights based on departure and arrival airports. It prioritizes
+    today's flights and can also show upcoming flights if none are available today.
 
     Args:
-        params: A GetFlightsParams object containing departure and arrival airport codes.
+        params: A GetFlightsParams object with departure and arrival airport codes.
 
     Returns:
-        A formatted string describing the available flights, or an error message.
+        A formatted string of available flights or a message if none are found.
     """
+    api_url = "http://api.aviationstack.com/v1/flights"
+    api_params = {
+        "access_key": AVIATIONSTACK_KEY,
+        "dep_iata": params.departure,
+        "arr_iata": params.arrival,
+        "limit": MAX_FLIGHT_RESULTS,
+    }
+
     try:
-        # First, try to get today's flights (without date filter to get current flights)
+        print(f"DEBUG: Searching flights from {params.departure} to {params.arrival}")
+        response = requests.get(api_url, params=api_params, timeout=API_TIMEOUT)
+        response.raise_for_status()  # Raise an exception for bad status codes (4xx or 5xx)
+
+        data = response.json()
+
+        # Check for API-level errors returned in a 200 OK response
+        if "error" in data:
+            error_info = data["error"]
+            code = error_info.get("code")
+            info = error_info.get("info", "No additional information provided.")
+            print(f"DEBUG: API returned error in JSON: {error_info}")
+            return (
+                f"An error occurred while fetching flight data: {info} (Code: {code})"
+            )
+
+        all_flights = data.get("data", [])
+
+        if not all_flights:
+            print("DEBUG: No flights found in the API response.")
+            return format_no_flights_message(params.departure, params.arrival)
+
         today = date.today()
-        url_today = f"http://api.aviationstack.com/v1/flights?access_key={AVIATIONSTACK_KEY}&dep_iata={params.departure}&arr_iata={params.arrival}"
+        today_str = today.isoformat()
 
-        print(
-            f"DEBUG: Searching for flights from {params.departure} to {params.arrival}"
-        )
+        # Separate today's flights from upcoming ones
+        todays_flights = [f for f in all_flights if f.get("flight_date") == today_str]
 
-        response_today = requests.get(url_today, timeout=API_TIMEOUT)
-
-        print(f"DEBUG: API Response Status: {response_today.status_code}")
-
-        if response_today.status_code == 200:
-            data_today = response_today.json()
-            flights_today = data_today.get("data", [])
-
-            print(f"DEBUG: Found {len(flights_today)} flights")
-
-            if flights_today:
-                # Found flights for today
-                formatted_result = format_flight_info(flights_today, today)
-                return formatted_result
-            else:
-                # No flights found - try with simpler search
-                print("DEBUG: No flights found, trying alternative search")
-
-                # Try without date filter and just get any available flights
-                url_general = f"http://api.aviationstack.com/v1/flights?access_key={AVIATIONSTACK_KEY}&dep_iata={params.departure}&arr_iata={params.arrival}&limit={MAX_FLIGHT_RESULTS}"
-
-                response_general = requests.get(url_general, timeout=API_TIMEOUT)
-
-                if response_general.status_code == 200:
-                    data_general = response_general.json()
-                    flights_general = data_general.get("data", [])
-
-                    if flights_general:
-                        # Found some flights, format as upcoming
-                        for flight in flights_general:
-                            flight["search_date"] = (
-                                today  # Default to today for formatting
-                            )
-
-                        formatted_result = format_upcoming_flights_info(
-                            flights_general, params.departure, params.arrival
-                        )
-                        return formatted_result
-                    else:
-                        return format_no_flights_message(
-                            params.departure, params.arrival
-                        )
-                else:
-                    return f"Error Fetching Flight Data\n\nAPI returned status code: {response_general.status_code}"
+        if todays_flights:
+            print(f"DEBUG: Found {len(todays_flights)} flights for today.")
+            return format_flight_info(todays_flights, today)
         else:
-            return f"Error Fetching Flight Data\n\nAPI returned status code: {response_today.status_code}. Please verify the airport codes and try again."
+            # If no flights for today, treat all results as "upcoming"
+            print(
+                f"DEBUG: No flights for today. Found {len(all_flights)} upcoming flights to display."
+            )
+            return format_upcoming_flights_info(
+                all_flights, params.departure, params.arrival
+            )
 
+    except requests.exceptions.HTTPError as e:
+        status_code = e.response.status_code
+        print(f"DEBUG: HTTP Error {status_code} from API. Response: {e.response.text}")
+        if status_code == 422:
+            return f"Error: Invalid airport code provided. Please double-check the departure '{params.departure}' and arrival '{params.arrival}' codes and try again."
+        elif status_code == 401:
+            return "API Key Error: Authentication failed. Please check the AVIATIONSTACK_KEY."
+        else:
+            return f"Error Fetching Flight Data: The server returned status {status_code}. Please try again later."
     except requests.exceptions.Timeout:
-        return "Request Timed Out\n\nThe flight search is taking too long. Please try again in a moment."
+        print("DEBUG: Request to AviationStack API timed out.")
+        return "Request Timed Out: The flight search is taking too long. Please try again in a moment."
     except requests.exceptions.RequestException as e:
-        return f"Network Error\n\nConnection issue: {str(e)}\n\nPlease check your internet connection and try again."
+        print(f"DEBUG: Network request exception: {e}")
+        return "Network Error: Could not connect to the flight data service. Please check your internet connection."
     except Exception as e:
-        return f"Unexpected Error\n\nSomething went wrong: {str(e)}\n\nPlease try again or contact support if the issue persists."
+        print(f"UNEXPECTED ERROR in get_flights: {e}")
+        return f"An unexpected error occurred: {e}. Please try again."

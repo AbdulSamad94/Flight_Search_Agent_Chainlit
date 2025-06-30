@@ -41,7 +41,7 @@ async def start():
     cl.user_session.set("agent", agent)
 
     await cl.Message(
-        content="Welcome to the AI Flight Assistant!\n\nI can help you find flights for today. Just tell me where you want to fly from & to, you can use city names or airport codes. How can I help you today?"
+        content="Welcome to the AI Flight Assistant!\n\nI can help you find flights for today. Just tell me where you want to fly from and to, you can use city names or airport codes. How can I help you today?"
     ).send()
 
 
@@ -69,7 +69,7 @@ async def main(message: cl.Message):
         await msg.update()
 
         # Stream the response
-        full_response = "Thinking"
+        full_response = "Thinking..."
 
         # Get the final response
         response_content = result.final_output
