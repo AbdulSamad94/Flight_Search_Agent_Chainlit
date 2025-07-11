@@ -11,7 +11,6 @@ from config import GEMINI_API_KEY
 from tools import get_flights, get_city_airport_code
 from agent_config import AGENT_INSTRUCTIONS
 
-
 @cl.on_chat_start
 async def start():
     """Initialize the chat session with agent configuration"""
